@@ -21,6 +21,11 @@ def curvature_and_margine_penalty_loss(pred_points_with_normal,gt_points_with_no
 if __name__ == "__main__":
     pred_point = torch.randn(8421,6).cuda()
     gt_point = torch.randn(7625,7).cuda()
+    '''
+    In order to support abitrary number of point in input and output, and perform knn using torch_geometric, the point cloud in our framework is represented in
+    [N,C] with N=N1+N2+....+Nb , where b is the batch size, and a corresponding batch index array is followed to tell which batch a certain point belongs to.
+    (B,N,C is not applicable since N is different)
+    '''
     batch_x = torch.cat([torch.zeros(3581, dtype=torch.long), torch.ones(8421-3581, dtype=torch.long)]).cuda()
     batch_y = torch.cat([torch.zeros(3814, dtype=torch.long), torch.ones(7625-3814, dtype=torch.long)]).cuda()
     print(curvature_and_margine_penalty_loss(pred_point,gt_point,batch_x,batch_y))
