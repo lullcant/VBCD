@@ -2,19 +2,7 @@ from torch_geometric.nn import knn
 import torch
 from torch import nn
 import torch.nn.functional as F
-def curvature_penalty_loss(pred_points_with_normal,gt_points_with_normal_and_curv,batch_x,batch_y):
-    pred_points,pred_normals = pred_points_with_normal[:,:3],pred_points_with_normal[:,3:6]
-    #pred_normals = F.normalize(pred_normals,dim=1)
 
-    gt_points,gt_normals,curvatures = gt_points_with_normal_and_curv[:,:3],gt_points_with_normal_and_curv[:,3:6]
-    assign_index_x2y = knn(pred_points,gt_points,1,batch_x,batch_y) # for each element y, the nearst point in x
-    assign_index_y2x = knn(gt_points,pred_points,1,batch_y,batch_x) # for each element x, the nearst point in y
-    gt_to_pred_dist = torch.sum((gt_points - pred_points[assign_index_x2y[1]])**2, dim=1)  # (M,)
-    gt_to_pred_weighted = gt_to_pred_dist * torch.exp(torch.abs(curvatures ))
-    pred_to_gt_dist = torch.sum((pred_points - gt_points[assign_index_y2x[1]])**2, dim=1)  # (N,)
-    pred_to_gt_weighted = pred_to_gt_dist * torch.exp(torch.abs(curvatures[assign_index_y2x[1]])) 
-    normal_loss = F.mse_loss(pred_normals, gt_normals[assign_index_y2x[1]])
-    return torch.mean(gt_to_pred_weighted)+torch.mean(pred_to_gt_weighted),normal_loss
 
 def curvature_and_margine_penalty_loss(pred_points_with_normal,gt_points_with_normal_and_curv,batch_x,batch_y):
     pred_points,pred_normals = pred_points_with_normal[:,:3],pred_points_with_normal[:,3:6]
