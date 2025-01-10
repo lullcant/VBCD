@@ -62,8 +62,8 @@ class CrownMVM(nn.Module):
     def __init__(self,scale=128,in_channels=1,out_channels=4):
         super(CrownMVM, self).__init__()
         self.unet = ResidualUNet3D(in_channels=in_channels,out_channels=out_channels,is_segmentation=False)
-        #self.feature_project = nn.Sequential(nn.Linear(64,64),nn.ReLU(),nn.Linear(64,6))
-        self.feature_project = nn.Linear(64,6)
+        self.offset_normal_predictor = nn.Sequential(nn.Linear(64,64),nn.ReLU(),nn.Linear(64,6))
+        #self.feature_project = nn.Linear(64,6)
     def mask_feature_to_nxc(self,mask, feature):
         '''
         Featurr selection
@@ -78,7 +78,7 @@ class CrownMVM(nn.Module):
         h_idx = nonzero_indices[:, 2]  # [N]
         w_idx = nonzero_indices[:, 3]  # [N]
         selected_feat = feature[b_idx, :, d_idx, h_idx, w_idx]  # [N, C]
-        offset_normal = self.feature_project(selected_feat)
+        offset_normal = self.offset_normal_predictor(selected_feat)
         return offset_normal
     
     def forward(self,batched_pna_voxel,min_bound_crop,prompt=None):
