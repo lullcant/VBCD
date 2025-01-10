@@ -7,8 +7,6 @@ import torch.nn.functional as F
 def curvature_and_margine_penalty_loss(pred_points_with_normal,gt_points_with_normal_and_curv,batch_x,batch_y):
     pred_points,pred_normals = pred_points_with_normal[:,:3],pred_points_with_normal[:,3:6]
     #pred_normals = F.normalize(pred_normals,dim=1)
-    if pred_points.shape[0] == 0:
-        return torch.tensor(10)
     gt_points,gt_normals,curvatures,whether_margin = gt_points_with_normal_and_curv[:,:3],gt_points_with_normal_and_curv[:,3:6],gt_points_with_normal_and_curv[:,6],gt_points_with_normal_and_curv[:,-1]
     assign_index_x2y = knn(pred_points,gt_points,1,batch_x,batch_y) # for each element y, the nearst point in x
     assign_index_y2x = knn(gt_points,pred_points,1,batch_y,batch_x) # for each element x, the nearst point in y
@@ -25,4 +23,4 @@ if __name__ == "__main__":
     gt_point = torch.randn(7625,7).cuda()
     batch_x = torch.cat([torch.zeros(3581, dtype=torch.long), torch.ones(8421-3581, dtype=torch.long)]).cuda()
     batch_y = torch.cat([torch.zeros(3814, dtype=torch.long), torch.ones(7625-3814, dtype=torch.long)]).cuda()
-    print(curvature_penalty_loss(pred_point,gt_point,batch_x,batch_y))
+    print(curvature_and_margine_penalty_loss(pred_point,gt_point,batch_x,batch_y))
