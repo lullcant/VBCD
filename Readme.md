@@ -1,3 +1,9 @@
-# The code repo for miccai2025 submission
-## Introduction to the repo
-This is the repo for our miccai 2025 submission. During the current under review phase, and as a precaution, we will provide the reviewers with the implementation code for our model, and the CMPL loss to facilitate a more concrete understanding of our method. If the paper is accepted, we will open-source the complete project, including training,inference code, pretrained model checkpoints etc. .
+# Code Repository for MICCAI 2025 Submission
+
+## Repository Overview
+
+This repository is dedicated to our MICCAI 2025 submission. During the review phase, we are providing the reviewers with the implementation code for our model, including the CMPL loss, to facilitate a clearer understanding of our methodology. Additionally, we have included sample data for reference. 
+
+However, due to anonymity requirements, we are unable to provide the pretrained model at this time. If our paper is accepted, we plan to open-source the complete project, including training and inference code, pretrained model checkpoints etc.
+
+
