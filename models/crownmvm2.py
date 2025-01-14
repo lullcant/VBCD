@@ -1,5 +1,5 @@
 import torch
-from models.unet3d import ResidualUNet3D
+from models.backbone import ResidualUNet3D
 from torch import nn
 from pytorch3d.ops import sample_farthest_points
 import torch
