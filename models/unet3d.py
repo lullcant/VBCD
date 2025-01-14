@@ -130,32 +130,6 @@ class AbstractUNet(nn.Module):
         return x,final_feature
 
 
-class UNet3D(AbstractUNet):
-    """
-    3DUnet model from
-    `"3D U-Net: Learning Dense Volumetric Segmentation from Sparse Annotation"
-        <https://arxiv.org/pdf/1606.06650.pdf>`.
-
-    Uses `DoubleConv` as a basic_module and nearest neighbor upsampling in the decoder
-    """
-
-    def __init__(self, in_channels, out_channels, final_sigmoid=True, f_maps=64, layer_order='gcr',
-                 num_groups=8, num_levels=4, is_segmentation=True, conv_padding=1,
-                 conv_upscale=2, upsample='default', dropout_prob=0.1, **kwargs):
-        super(UNet3D, self).__init__(in_channels=in_channels,
-                                     out_channels=out_channels,
-                                     final_sigmoid=final_sigmoid,
-                                     basic_module=DoubleConv,
-                                     f_maps=f_maps,
-                                     layer_order=layer_order,
-                                     num_groups=num_groups,
-                                     num_levels=num_levels,
-                                     is_segmentation=is_segmentation,
-                                     conv_padding=conv_padding,
-                                     conv_upscale=conv_upscale,
-                                     upsample=upsample,
-                                     dropout_prob=dropout_prob,
-                                     is3d=True)
 
 
 class ResidualUNet3D(AbstractUNet):
@@ -185,82 +159,6 @@ class ResidualUNet3D(AbstractUNet):
                                              is3d=True)
 
 
-class ResidualUNetSE3D(AbstractUNet):
-    """_summary_
-    Residual 3DUnet model implementation with squeeze and excitation based on 
-    https://arxiv.org/pdf/1706.00120.pdf.
-    Uses ResNetBlockSE as a basic building block, summation joining instead
-    of concatenation joining and transposed convolutions for upsampling (watch
-    out for block artifacts). Since the model effectively becomes a residual
-    net, in theory it allows for deeper UNet.
-    """
-
-    def __init__(self, in_channels, out_channels, final_sigmoid=True, f_maps=64, layer_order='gcr',
-                 num_groups=8, num_levels=5, is_segmentation=True, conv_padding=1,
-                 conv_upscale=2, upsample='default', dropout_prob=0.1, **kwargs):
-        super(ResidualUNetSE3D, self).__init__(in_channels=in_channels,
-                                               out_channels=out_channels,
-                                               final_sigmoid=final_sigmoid,
-                                               basic_module=ResNetBlockSE,
-                                               f_maps=f_maps,
-                                               layer_order=layer_order,
-                                               num_groups=num_groups,
-                                               num_levels=num_levels,
-                                               is_segmentation=is_segmentation,
-                                               conv_padding=conv_padding,
-                                               conv_upscale=conv_upscale,
-                                               upsample=upsample,
-                                               dropout_prob=dropout_prob,
-                                               is3d=True)
-
-
-class UNet2D(AbstractUNet):
-    """
-    2DUnet model from
-    `"U-Net: Convolutional Networks for Biomedical Image Segmentation" <https://arxiv.org/abs/1505.04597>`
-    """
-
-    def __init__(self, in_channels, out_channels, final_sigmoid=True, f_maps=64, layer_order='gcr',
-                 num_groups=8, num_levels=4, is_segmentation=True, conv_padding=1,
-                 conv_upscale=2, upsample='default', dropout_prob=0.1, **kwargs):
-        super(UNet2D, self).__init__(in_channels=in_channels,
-                                     out_channels=out_channels,
-                                     final_sigmoid=final_sigmoid,
-                                     basic_module=DoubleConv,
-                                     f_maps=f_maps,
-                                     layer_order=layer_order,
-                                     num_groups=num_groups,
-                                     num_levels=num_levels,
-                                     is_segmentation=is_segmentation,
-                                     conv_padding=conv_padding,
-                                     conv_upscale=conv_upscale,
-                                     upsample=upsample,
-                                     dropout_prob=dropout_prob,
-                                     is3d=False)
-
-
-class ResidualUNet2D(AbstractUNet):
-    """
-    Residual 2DUnet model implementation based on https://arxiv.org/pdf/1706.00120.pdf.
-    """
-
-    def __init__(self, in_channels, out_channels, final_sigmoid=True, f_maps=64, layer_order='gcr',
-                 num_groups=8, num_levels=5, is_segmentation=True, conv_padding=1,
-                 conv_upscale=2, upsample='default', dropout_prob=0.1, **kwargs):
-        super(ResidualUNet2D, self).__init__(in_channels=in_channels,
-                                             out_channels=out_channels,
-                                             final_sigmoid=final_sigmoid,
-                                             basic_module=ResNetBlock,
-                                             f_maps=f_maps,
-                                             layer_order=layer_order,
-                                             num_groups=num_groups,
-                                             num_levels=num_levels,
-                                             is_segmentation=is_segmentation,
-                                             conv_padding=conv_padding,
-                                             conv_upscale=conv_upscale,
-                                             upsample=upsample,
-                                             dropout_prob=dropout_prob,
-                                             is3d=False)
 
 
 def get_model(model_config):
