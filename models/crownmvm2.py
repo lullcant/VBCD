@@ -9,7 +9,7 @@ import torch.nn.functional as F
 def volume_to_point_cloud_tensor(
     volume: torch.Tensor, 
     voxel_size=(0.2, 0.2, 0.2), 
-    origin=None
+  
 ):
 
 
@@ -23,18 +23,7 @@ def volume_to_point_cloud_tensor(
                                          device=device, 
                                          dtype=torch.float32)  # [3]
     else:
-        voxel_size_tensor = voxel_size.to(device=device, dtype=torch.float32)
-
-    
-    if origin is None:
- 
-        origin_tensor = torch.zeros((B, 3), device=device, dtype=torch.float32)
-    else:
-        origin_tensor = origin.to(device=device, dtype=torch.float32)
-     
-        if origin_tensor.ndim == 1:
-            origin_tensor = origin_tensor.unsqueeze(0).expand(B, -1)  # [B, 3]
-       
+        voxel_size_tensor = voxel_size.to(device=device, dtype=torch.float32)     
 
 
     foreground_prob = torch.sigmoid(volume)                     # [B, 1, D, H, W]
@@ -49,7 +38,7 @@ def volume_to_point_cloud_tensor(
 
     coords_dhw = torch.stack([d ,h, w], dim=-1).float()  # [N, 3]
 
-    coords_xyz = origin_tensor[b] + coords_dhw * voxel_size_tensor  # [N, 3]
+    coords_xyz =  coords_dhw * voxel_size_tensor  # [N, 3]
 
     
     b_float = b.float().unsqueeze(-1)  # [N, 1]
@@ -81,14 +70,14 @@ class CrownMVM(nn.Module):
         offset_normal = self.offset_normal_predictor(selected_feat)
         return offset_normal
     
-    def forward(self,batched_pna_voxel,min_bound_crop,prompt=None):
+    def forward(self,batched_pna_voxel,prompt=None):
         voxel,final_feature = self.unet(batched_pna_voxel,prompt)
         offset_normal = self.mask_feature_to_nxc(voxel,final_feature)
         offset = offset_normal[:,:3]
         normals = offset_normal[:,3:]
         voxel_ind = voxel[:,:1,:,:,:]
         voxel_normal = voxel[:,1:,:,:,:]
-        pred_pc = volume_to_point_cloud_tensor(volume=voxel_ind,voxel_size=(0.15625,0.15625,0.15625),origin=min_bound_crop)
+        pred_pc = volume_to_point_cloud_tensor(volume=voxel_ind,voxel_size=(0.15625,0.15625,0.15625))
         refined_pos = offset + pred_pc[:,1:]
         refined_pos_with_normal = torch.cat([refined_pos,normals],dim=1)
         batch_x = pred_pc[:,0]
