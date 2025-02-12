@@ -175,32 +175,30 @@ def denormalize_point_cloud(normalized_point_cloud, point_cloud_center, crop_siz
     return point_cloud
 
 def extract_and_rename(path):
-    # 分割路径为各个部分
+   
     parts = path.split(os.sep)
     
-    # 提取倒数第三块和最后一块
-    third_last_part = parts[-3]  # '11'
-    last_part = parts[-1]        # '1877537' 或带有扩展名的文件名
     
-    # 如果最后一部分包含文件扩展名，则去掉扩展名
+    third_last_part = parts[-3]
+    last_part = parts[-1]       
+    
+    
     file_name, file_extension = os.path.splitext(last_part)
     
-    # 构造新的文件名
+   
     new_file_name = f"{third_last_part}+{file_name}"
     
     return new_file_name
 
 def test(model, test_loader, voxel_size=(0.15625,0.15625,0.15625), save_path='./test_outputs', save_batches=4):
-    """
-    测试函数，计算 Hausdorff 距离，并保存前若干批次的点云输出。
-    """
-    model.eval()  # 切换到评估模式
+    
+    model.eval() 
     test_hausdorff = 0.0
     test_fidelity = 0.0
     test_f_value = 0.0
     dpsr = DPSR(res=(128,128, 128), sig = 2)
 
-    # 创建保存目录
+    
     os.makedirs(save_path, exist_ok=True)
     with torch.no_grad():
         for batch_idx,(inputs,targets,pointcloud_inform,batch_y,min_bound_crop,prompt,file_dir) in enumerate(tqdm(test_loader)):
@@ -259,7 +257,7 @@ def test_main():
     parser.add_argument('--save_path', type=str, default='./test_outputs', help='Path to save the test results')
     args = parser.parse_args()
     if not os.path.exists(args.save_path):
-        os.makedirs(args.save_path)  # 如果不存在，创建目录
+        os.makedirs(args.save_path)  
     
     model = CrownMVM(in_channels=1,out_channels=4)
  
