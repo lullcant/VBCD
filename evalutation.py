@@ -46,16 +46,7 @@ def update_teeth_statistics(teeth_dict, file_name, chamfer_dist,fidelity,f_value
 save_file = True
 accelerator = Accelerator()
 
-def dice_coefficient(pred, target, smooth=1e-5):
-    # Flatten the predictions and targets
-    pred = pred.view(-1)
-    target = target.view(-1)
-    
-    # Compute the intersection and union
-    intersection = (pred * target).sum()
-    dice_coeff = (2.0 * intersection + smooth) / (pred.sum() + target.sum() + smooth)
-    
-    return dice_coeff
+
 
 import pyvista as pv
 
@@ -205,7 +196,7 @@ def test(model, test_loader, voxel_size=(0.15625,0.15625,0.15625), save_path='./
             
 
             with accelerator.autocast():
-                voxel_ind,voxel_normal,refined_pos_with_normal,batch_x = model(inputs.cuda(),min_bound_crop,prompt.cuda())
+                voxel_ind,refined_pos_with_normal,batch_x = model(inputs.cuda(),min_bound_crop,prompt.cuda())
             position_indicator = F.sigmoid(voxel_ind)
             position_indicator = (position_indicator>0.5).float()   
                 # fidelity_val = fidelity(pred_points=refined_pos_with_normal[:,:3].cuda(),gt_points=pointcloud_inform[:,:3].cuda(),batch_x=batch_x.cuda(),batch_y=batch_y.cuda())
