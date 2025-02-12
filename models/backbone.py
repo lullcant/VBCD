@@ -6,18 +6,67 @@ from models.utils import get_class, number_of_features_per_level
 from einops import rearrange
 use_prompt = True
 
+
+class ECA_3D(nn.Module):
+    def __init__(self, k_size=3):
+        super(ECA_3D, self).__init__()
+        self.avg_pool = nn.AdaptiveAvgPool3d(1)  
+        self.conv = nn.Conv1d(in_channels=1, out_channels=1, 
+                              kernel_size=k_size, padding=(k_size - 1) // 2, bias=False)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+      
+        b, c, d, h, w = x.size()
+        
+
+        y = self.avg_pool(x)
+        
+ 
+        y = y.view(b, c)
+        
+       
+        y = y.unsqueeze(1)
+        
+        y = self.conv(y)  
+        
+        
+        y = self.sigmoid(y).view(b, c, 1, 1, 1)
+        
+        return x * y.expand_as(x)
+
+
+
+    
 class Mask_Conv(nn.Module):
     def __init__(self, in_channel ,out_channel):
         super().__init__()
+        self.eca = ECA_3D(k_size=3)
         self.conv = nn.Conv3d(in_channels=in_channel,out_channels=out_channel, kernel_size=3, stride=1, padding=1, bias=False)
-        self.norm = nn.InstanceNorm3d(out_channel)
         self.act = nn.ReLU()
     def forward(self,x_with_prompt):
-        x = self.conv(x_with_prompt)
-        x = self.norm(x)
+        x = self.eca(x_with_prompt)
+        x = self.conv(x)
         x = self.act(x)
         return x
 
+class PromptEncoder(nn.Module):
+    def __init__(self,embed_dim=64):
+        super(PromptEncoder, self).__init__()
+        self.embedding = nn.Embedding(num_embeddings=14, embedding_dim=embed_dim) 
+        self.conv1 = nn.Conv3d(in_channels=embed_dim,out_channels=128,kernel_size=3,padding=1)
+        self.relu = nn.ReLU()
+        self.conv2 = nn.Conv3d(in_channels=128,out_channels=128,kernel_size=3,padding=1)
+    def forward(self,tooth_number,x):
+        b, _,d, h, w = x.size()
+        tooth_embedding = self.embedding(tooth_number)
+        tooth_embedding = rearrange(tooth_embedding,'b c -> b c 1 1 1').expand(b,64,d,h,w)
+        x = self.conv1(tooth_embedding)
+        x = self.relu(x)
+        x = self.conv2(x)
+        x = self.relu(x)
+        return x
+    
 class AbstractUNet(nn.Module):
     """
     Base class for standard and residual UNet.
@@ -79,7 +128,8 @@ class AbstractUNet(nn.Module):
                                         is3d)
         # use prompt encoder
         if use_prompt:
-            self.prompt_encoder = Mask_Conv(in_channel=1024+14,out_channel=1024)
+            self.mask_conv = Mask_Conv(in_channel=1024+128,out_channel=1024)
+            self.prompt_encoder = PromptEncoder(embed_dim=64)
         # in the last layer a 1×1 convolution reduces the number of output channels to the number of labels
         if is3d:
             self.final_conv = nn.Conv3d(f_maps[0], out_channels, 1)
@@ -109,11 +159,10 @@ class AbstractUNet(nn.Module):
         encoders_features = encoders_features[1:]
         ## Using Prompt
         if use_prompt:
-            b, _,d, h, w = x.size()
-            prompt = rearrange(prompt,'b c -> b c 1 1 1').expand(b, 14, d,h, w)
+            prompt = self.prompt_encoder(prompt,x)
            # prompt = self.prompt_encoder(prompt)
             x = torch.cat([x,prompt],dim=1)
-            x = self.prompt_encoder(x)
+            x = self.mask_conv(x)
         # decoder part
         for decoder, encoder_features in zip(self.decoders, encoders_features):
             # pass the output from the corresponding encoder and the output
