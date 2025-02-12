@@ -250,7 +250,7 @@ def test_main():
     if not os.path.exists(args.save_path):
         os.makedirs(args.save_path)  
     
-    model = CrownMVM(in_channels=1,out_channels=4)
+    model = CrownMVM(in_channels=1,out_channels=1)
  
     ckpt = torch.load(args.model_path)
     ckpt = {k[7:] if k.startswith('module.') else k: v for k, v in ckpt.items()}
