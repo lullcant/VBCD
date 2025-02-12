@@ -48,7 +48,7 @@ def volume_to_point_cloud_tensor(
 
 
 class CrownMVM(nn.Module):
-    def __init__(self,scale=128,in_channels=1,out_channels=4):
+    def __init__(self,scale=128,in_channels=1,out_channels=1):
         super(CrownMVM, self).__init__()
         self.unet = ResidualUNet3D(in_channels=in_channels,out_channels=out_channels,is_segmentation=False)
         self.offset_normal_predictor = nn.Sequential(nn.Linear(64,64),nn.ReLU(),nn.Linear(64,6))
@@ -76,10 +76,9 @@ class CrownMVM(nn.Module):
         offset = offset_normal[:,:3]
         normals = offset_normal[:,3:]
         voxel_ind = voxel[:,:1,:,:,:]
-        voxel_normal = voxel[:,1:,:,:,:]
         pred_pc = volume_to_point_cloud_tensor(volume=voxel_ind,voxel_size=(0.15625,0.15625,0.15625))
         refined_pos = offset + pred_pc[:,1:]
         refined_pos_with_normal = torch.cat([refined_pos,normals],dim=1)
         batch_x = pred_pc[:,0]
-        return voxel_ind,voxel_normal,refined_pos_with_normal,batch_x
+        return voxel_ind,refined_pos_with_normal,batch_x
 
