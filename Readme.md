@@ -1,5 +1,9 @@
 # Official Repo For MICCAI 2025 Paper--VBCD：A Voxel Based Framework for Personlized Dental Crown Generation
 ![示意图](./figures/architecture_new.png)
+## Setup
+```
+pip install -r requirement.txt
+```
 ## Model
 The crownmvm2.py is the VBCD pipeline that can generate teeth
 ## Sample Data
