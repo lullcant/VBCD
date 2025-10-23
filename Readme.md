@@ -4,6 +4,18 @@
 ```
 pip install -r requirement.txt
 ```
+## DataStructure
+```
+/IOS Dataset
+│
+├── 11/                   # fdi number
+│   ├── test/             # test or train
+│   │   ├── 1702470/      # patient ID
+│   │   │   ├── crown_attributes.h5 # curvatures，margin or not
+│   │   │   ├── crown.ply # crown
+│   │   │   ├── pna_crop.ply # IOS
+│   │   │   
+```
 ## Model
 The crownmvm2.py is the VBCD pipeline that can generate teeth
 ## Sample Data
